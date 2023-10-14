@@ -2,8 +2,26 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Site Map</h1>
+<h1>Site Maps</h1>
 
+
+<h2>DataSource Component</h2>
 <MenuComponent>
     <SiteMapDataSource />
 </MenuComponent>
+
+<h2>DataSource From Code</h2>
+<MenuComponent DataSource="_entries" />
+
+@code{
+
+    private List<SiteMapEntry> _entries = new()
+    {
+ 
+        new SiteMapEntry("Code Entry 1", "/DummyPage/1"),
+        new SiteMapEntry("Code Entry 2", "/DummyPage/2"),
+        new SiteMapEntry("Code Entry 3", "/DummyPage/3"),
+        new SiteMapEntry("Code Entry 4", "/DummyPage/4"),
+        new SiteMapEntry("Code Entry 5", "/DummyPage/5"),
+    };
+}

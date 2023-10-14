@@ -5,9 +5,9 @@
     @ChildContent
 </CascadingValue>
 
-@if (_entries is not null && _entries.Count > 0)
+@if (HasEntries)
 {
-    @foreach (SiteMapEntry entry in _entries)
+    @foreach (SiteMapEntry entry in DataSource!)
     {
         <p>@entry.Title</p>
     }
@@ -18,12 +18,15 @@ else
 }
 
 @code {
-    private ISiteMapDataSource? _dataSource;
+    private ISiteMapDataSource? _dataProvider;
 
-    private IList<SiteMapEntry>? _entries;
+    [Parameter]
+    public IEnumerable<SiteMapEntry>? DataSource { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    private bool HasEntries => DataSource?.Any() == true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -34,10 +37,10 @@ else
 
     public void SetDataSource(ISiteMapDataSource dataSource)
     {
-        _dataSource = dataSource;
-        _dataSource.DataSourceChanged += OnDataSourceChanged;
+        _dataProvider = dataSource;
+        _dataProvider.DataSourceChanged += OnDataSourceChanged;
 
-        _entries = new List<SiteMapEntry>(_dataSource.Get());
+        DataSource = new List<SiteMapEntry>(_dataProvider.Get());
     }
 
     private async void OnDataSourceChanged(object? sender, EventArgs e)
@@ -48,15 +51,15 @@ else
 
     private async ValueTask UpdateSiteMapAsync()
     {
-        if (_entries is not null && _entries.Count > 0)
+        if (HasEntries)
             await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        if (_dataSource is null)
+        if (_dataProvider is null)
             return;
 
-        _dataSource.DataSourceChanged -= OnDataSourceChanged;
+        _dataProvider.DataSourceChanged -= OnDataSourceChanged;
     }
 }
