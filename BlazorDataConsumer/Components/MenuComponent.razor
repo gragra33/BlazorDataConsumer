@@ -1,0 +1,62 @@
+﻿@implements ISiteMapConsumer
+@implements IDisposable
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@if (_entries is not null && _entries.Count > 0)
+{
+    @foreach (SiteMapEntry entry in _entries)
+    {
+        <p>@entry.Title</p>
+    }
+}
+else
+{
+    <div>No site map entries</div>
+}
+
+@code {
+    private ISiteMapDataSource? _dataSource;
+
+    private IList<SiteMapEntry>? _entries;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // check on startup if we have data to show...
+        if (firstRender)
+            await UpdateSiteMapAsync();
+    }
+
+    public void SetDataSource(ISiteMapDataSource dataSource)
+    {
+        _dataSource = dataSource;
+        _dataSource.DataSourceChanged += OnDataSourceChanged;
+
+        _entries = new List<SiteMapEntry>(_dataSource.Get());
+    }
+
+    private async void OnDataSourceChanged(object? sender, EventArgs e)
+    {
+        // handle changes
+        await UpdateSiteMapAsync();
+    }
+
+    private async ValueTask UpdateSiteMapAsync()
+    {
+        if (_entries is not null && _entries.Count > 0)
+            await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        if (_dataSource is null)
+            return;
+
+        _dataSource.DataSourceChanged += OnDataSourceChanged;
+    }
+}
